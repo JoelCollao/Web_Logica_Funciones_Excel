@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FuncioLogic — Excel para Jóvenes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    /* ==============================
+       VARIABLES & RESET
+    ============================== */
+    :root {
+      --bg:        #0e0f1a;
+      --surface:   #161728;
+      --card:      #1e2035;
+      --border:    rgba(255,255,255,0.07);
+      --accent1:   #6c63ff;   /* violet */
+      --accent2:   #ff6584;   /* coral */
+      --accent3:   #43e97b;   /* mint */
+      --accent4:   #f7971e;   /* amber */
+      --text:      #e8e9f3;
+      --muted:     #7b7e9a;
+      --radius:    14px;
+      --transition: 0.35s cubic-bezier(.4,0,.2,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ==============================
+       BACKGROUND DECORATION
+    ============================== */
+    .bg-glow {
+      position: fixed;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 900px; height: 600px;
+      background: radial-gradient(ellipse, rgba(108,99,255,.18) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ==============================
+       HEADER / HERO
+    ============================== */
+    header {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 56px 20px 32px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(108,99,255,.15);
+      border: 1px solid rgba(108,99,255,.35);
+      color: #a89dff;
+      font-size: .75rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 100px;
+      margin-bottom: 18px;
+    }
+
+    header h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      line-height: 1.1;
+      letter-spacing: -.02em;
+      margin-bottom: 14px;
+    }
+
+    header h1 span {
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ==============================
+       TABS
+    ============================== */
+    .tabs-wrapper {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      padding: 0 20px 32px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 5px;
+      border-radius: 100px;
+    }
+
+    .tab-btn {
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .88rem;
+      letter-spacing: .02em;
+      padding: 9px 24px;
+      border-radius: 100px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      transition: var(--transition);
+    }
+
+    .tab-btn:hover { color: var(--text); }
+
+    .tab-btn.active {
+      background: var(--accent1);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(108,99,255,.4);
+    }
+
+    /* ==============================
+       CONTENT SECTIONS
+    ============================== */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active {
+      display: block;
+      animation: fadeUp .45s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==============================
+       FUNCTION CARDS (Resumen)
+    ============================== */
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      font-size: .95rem;
+      margin-bottom: 28px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 20px;
+    }
+
+    @media (max-width: 500px) {
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+
+    .fn-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: transform var(--transition), box-shadow var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fn-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    .fn-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,.35);
+    }
+
+    .fn-card.si::before   { background: var(--accent1); }
+    .fn-card.y::before    { background: var(--accent3); }
+    .fn-card.o::before    { background: var(--accent4); }
+    .fn-card.no::before   { background: var(--accent2); }
+
+    .fn-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .fn-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .fn-card.si .fn-icon  { background: rgba(108,99,255,.2);  color: var(--accent1); }
+    .fn-card.y .fn-icon   { background: rgba(67,233,123,.2);  color: var(--accent3); }
+    .fn-card.o .fn-icon   { background: rgba(247,151,30,.2);  color: var(--accent4); }
+    .fn-card.no .fn-icon  { background: rgba(255,101,132,.2); color: var(--accent2); }
+
+    .fn-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+    }
+
+    .fn-tagline {
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    .fn-card p {
+      font-size: .9rem;
+      color: #b0b3cc;
+      line-height: 1.65;
+      margin-bottom: 14px;
+    }
+
+    .fn-label {
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .fn-syntax {
+      background: rgba(0,0,0,.35);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: 'Courier New', monospace;
+      font-size: .85rem;
+      color: #c9cadf;
+      margin-bottom: 12px;
+      word-break: break-all;
+    }
+
+    .fn-example {
+      background: rgba(0,0,0,.2);
+      border-left: 3px solid;
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      font-size: .85rem;
+      line-height: 1.6;
+      color: #b0b3cc;
+    }
+
+    .fn-card.si .fn-example  { border-color: var(--accent1); }
+    .fn-card.y .fn-example   { border-color: var(--accent3); }
+    .fn-card.o .fn-example   { border-color: var(--accent4); }
+    .fn-card.no .fn-example  { border-color: var(--accent2); }
+
+    .fn-example strong { color: var(--text); }
+
+    /* ==============================
+       EXERCISES (Práctica)
+    ============================== */
+    /* Progress bar */
+    .progress-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      height: 10px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      border-radius: 100px;
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+      width: 0%;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: .8rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    /* Score banner */
+    .score-banner {
+      display: none;
+      background: linear-gradient(135deg, rgba(108,99,255,.2), rgba(67,233,123,.15));
+      border: 1px solid rgba(108,99,255,.35);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 28px;
+      animation: fadeUp .5s ease both;
+    }
+
+    .score-banner h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+    }
+
+    .score-banner p { color: var(--muted); font-size: .95rem; }
+
+    .score-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 3.2rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--accent1), var(--accent3));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      margin: 10px 0 6px;
+    }
+
+    /* Exercise cards */
+    .exercise-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px;
+      margin-bottom: 20px;
+      transition: border-color var(--transition);
+    }
+
+    .exercise-card.correct  { border-color: rgba(67,233,123,.45); }
+    .exercise-card.wrong    { border-color: rgba(255,101,132,.35); }
+
+    .ex-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .ex-num {
+      width: 34px; height: 34px;
+      background: rgba(108,99,255,.2);
+      border: 1px solid rgba(108,99,255,.35);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: .9rem;
+      color: var(--accent1);
+      flex-shrink: 0;
+    }
+
+    .ex-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 3px;
+    }
+
+    .ex-context {
+      background: rgba(0,0,0,.25);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: .88rem;
+      color: #b0b3cc;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .ex-context strong { color: var(--text); }
+
+    .ex-question {
+      font-size: .93rem;
+      color: var(--text);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .ex-input-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .ex-input {
+      flex: 1;
+      min-width: 200px;
+      background: rgba(0,0,0,.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+
+    .ex-input:focus {
+      border-color: rgba(108,99,255,.6);
+      box-shadow: 0 0 0 3px rgba(108,99,255,.12);
+    }
+
+    .ex-input:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .btn-validate {
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .85rem;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent1);
+      color: #fff;
+      transition: var(--transition);
+      box-shadow: 0 4px 14px rgba(108,99,255,.3);
+    }
+
+    .btn-validate:hover:not(:disabled) {
+      background: #7d75ff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(108,99,255,.45);
+    }
+
+    .btn-validate:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Feedback messages */
+    .feedback {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: .88rem;
+      font-weight: 500;
+      display: none;
+      animation: fadeUp .3s ease both;
+    }
+
+    .feedback.correct {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(67,233,123,.12);
+      border: 1px solid rgba(67,233,123,.3);
+      color: #43e97b;
+    }
+
+    .feedback.wrong {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,101,132,.1);
+      border: 1px solid rgba(255,101,132,.25);
+      color: #ff8fa3;
+    }
+
+    /* Hint */
+    .hint-btn {
+      background: none;
+      border: 1px dashed rgba(255,255,255,.15);
+      color: var(--muted);
+      font-size: .78rem;
+      padding: 4px 12px;
+      border-radius: 100px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: var(--transition);
+    }
+
+    .hint-btn:hover { color: var(--text); border-color: rgba(255,255,255,.3); }
+
+    .hint-text {
+      display: none;
+      margin-top: 8px;
+      font-size: .83rem;
+      color: var(--accent4);
+      background: rgba(247,151,30,.08);
+      border: 1px solid rgba(247,151,30,.2);
+      border-radius: 8px;
+      padding: 9px 12px;
+    }
+
+    /* Bottom controls */
+    .controls-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .btn-reset {
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .83rem;
+      padding: 9px 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      transition: var(--transition);
+    }
+
+    .btn-reset:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,.25);
+    }
+
+    /* ==============================
+       FOOTER
+    ============================== */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 20px;
+      font-size: .8rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background glow -->
+  <div class="bg-glow"></div>
+
+  <!-- ==============================
+       HEADER
+  ============================== -->
+  <header>
+    <div class="badge">📊 Excel Lógico</div>
+    <h1>Aprende <span>Funciones Lógicas</span><br>en Excel</h1>
+    <p>Domina las funciones SI, Y, O y NO de forma práctica, visual e interactiva.</p>
+  </header>
+
+  <!-- ==============================
+       TABS
+  ============================== -->
+  <div class="tabs-wrapper">
+    <div class="tabs" role="tablist">
+      <button class="tab-btn active" data-tab="resumen"    role="tab">📖 Resumen</button>
+      <button class="tab-btn"         data-tab="ejercicios" role="tab">✏️ Ejercicios</button>
+    </div>
+  </div>
+
+  <!-- ==============================
+       MAIN CONTAINER
+  ============================== -->
+  <div class="container">
+
+    <!-- ============ TAB: RESUMEN ============ -->
+    <div id="resumen" class="tab-content active">
+
+      <div class="section-title">Funciones Lógicas</div>
+      <div class="section-sub">Haz clic en una tarjeta para explorar cada función.</div>
+
+      <div class="cards-grid">
+
+        <!-- SI -->
+        <div class="fn-card si">
+          <div class="fn-header">
+            <div class="fn-icon">🔀</div>
+            <div>
+              <div class="fn-name">Función SI</div>
+              <div class="fn-tagline">Toma de decisiones</div>
+            </div>
+          </div>
+          <p>Evalúa una condición y devuelve un valor si es <strong>verdadera</strong> y otro si es <strong>falsa</strong>. Es la función lógica más usada en Excel.</p>
+          <div class="fn-label">Sintaxis</div>
+          <div class="fn-syntax">=SI(prueba_lógica; valor_si_verdadero; valor_si_falso)</div>
+          <div class="fn-label">Ejemplo práctico</div>
+          <div class="fn-example">
+            Un alumno aprueba si su nota es ≥ 6.<br>
+            <strong>=SI(B2&gt;=6; "Aprobado"; "Reprobado")</strong><br>
+            Si B2 = 7 → devuelve <em>"Aprobado"</em>.
+          </div>
+        </div>
+
+        <!-- Y -->
+        <div class="fn-card y">
+          <div class="fn-header">
+            <div class="fn-icon">🔗</div>
+            <div>
+              <div class="fn-name">Función Y</div>
+              <div class="fn-tagline">Todas deben cumplirse</div>
+            </div>
+          </div>
+          <p>Devuelve <strong>VERDADERO</strong> solo si <em>todas</em> las condiciones son verdaderas. Si al menos una falla, devuelve FALSO.</p>
+          <div class="fn-label">Sintaxis</div>
+          <div class="fn-syntax">=Y(condición1; condición2; ...)</div>
+          <div class="fn-label">Ejemplo práctico</div>
+          <div class="fn-example">
+            Un empleado recibe bono si vende &gt; 100 Y tiene buena asistencia.<br>
+            <strong>=SI(Y(B2&gt;100; C2="Sí"); "Bono"; "Sin bono")</strong><br>
+            Ambas condiciones deben cumplirse.
+          </div>
+        </div>
+
+        <!-- O -->
+        <div class="fn-card o">
+          <div class="fn-header">
+            <div class="fn-icon">🔄</div>
+            <div>
+              <div class="fn-name">Función O</div>
+              <div class="fn-tagline">Basta con una condición</div>
+            </div>
+          </div>
+          <p>Devuelve <strong>VERDADERO</strong> si <em>al menos una</em> de las condiciones es verdadera. Solo devuelve FALSO si todas fallan.</p>
+          <div class="fn-label">Sintaxis</div>
+          <div class="fn-syntax">=O(condición1; condición2; ...)</div>
+          <div class="fn-label">Ejemplo práctico</div>
+          <div class="fn-example">
+            Un estudiante es "Seleccionado" si tiene nota &gt; 8 O asistencia = 100%.<br>
+            <strong>=SI(O(B2&gt;8; C2=100); "Seleccionado"; "No")</strong>
+          </div>
+        </div>
+
+        <!-- NO -->
+        <div class="fn-card no">
+          <div class="fn-header">
+            <div class="fn-icon">🚫</div>
+            <div>
+              <div class="fn-name">Función NO</div>
+              <div class="fn-tagline">Invierte el resultado</div>
+            </div>
+          </div>
+          <p>Invierte el valor lógico: convierte <strong>VERDADERO</strong> en FALSO y viceversa. Útil para negar condiciones.</p>
+          <div class="fn-label">Sintaxis</div>
+          <div class="fn-syntax">=NO(condición)</div>
+          <div class="fn-label">Ejemplo práctico</div>
+          <div class="fn-example">
+            Marcar productos que <em>no</em> están en stock.<br>
+            <strong>=SI(NO(B2="En stock"); "Pedir"; "OK")</strong><br>
+            Si B2 ≠ "En stock" → devuelve <em>"Pedir"</em>.
+          </div>
+        </div>
+
+      </div><!-- /cards-grid -->
+    </div><!-- /resumen -->
+
+
+    <!-- ============ TAB: EJERCICIOS ============ -->
+    <div id="ejercicios" class="tab-content">
+
+      <!-- Score banner (hidden until all done) -->
+      <div class="score-banner" id="scoreBanner">
+        <h2>🏆 ¡Desafío completado!</h2>
+        <div class="score-num" id="scoreNum">0 / 4</div>
+        <p id="scoreMsg">Sigue practicando para dominar las funciones lógicas.</p>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-label">
+        <span>Progreso</span>
+        <span id="progressText">0 / 4 completados</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <!-- ---- Ejercicio 1 ---- -->
+      <div class="exercise-card" id="ex1">
+        <div class="ex-header">
+          <div class="ex-num">1</div>
+          <div>
+            <div class="ex-title">Calificaciones escolares — Función SI</div>
+            <div style="font-size:.83rem;color:var(--muted)">Nivel: Básico</div>
+          </div>
+        </div>
+        <div class="ex-context">
+          📚 Tienes una lista de estudiantes con sus notas en la columna <strong>B</strong>. El mínimo para aprobar es <strong>6</strong>.
+        </div>
+        <div class="ex-question">
+          Escribe una fórmula que muestre <strong>"Aprobado"</strong> si la nota en B2 es mayor o igual a 6, o <strong>"Reprobado"</strong> si no lo es.
+        </div>
+        <div class="ex-input-row">
+          <input class="ex-input" type="text" id="ans1" placeholder='=SI(...)' autocomplete="off" spellcheck="false"/>
+          <button class="btn-validate" onclick="validate(1)">Validar ✓</button>
+        </div>
+        <button class="hint-btn" onclick="toggleHint(1)">💡 Ver pista</button>
+        <div class="hint-text" id="hint1">Recuerda la sintaxis: =SI(condición; valor_si_verdadero; valor_si_falso). La condición compara B2 con el número 6.</div>
+        <div class="feedback" id="fb1"></div>
+      </div>
+
+      <!-- ---- Ejercicio 2 ---- -->
+      <div class="exercise-card" id="ex2">
+        <div class="ex-header">
+          <div class="ex-num">2</div>
+          <div>
+            <div class="ex-title">Ventas y asistencia — Función Y</div>
+            <div style="font-size:.83rem;color:var(--muted)">Nivel: Intermedio</div>
+          </div>
+        </div>
+        <div class="ex-context">
+          🏬 Una empresa da <strong>bono</strong> a los vendedores que cumplan <em>ambas</em> condiciones: ventas en <strong>B2 &gt; 100</strong> Y asistencia en <strong>C2 = "Sí"</strong>.
+        </div>
+        <div class="ex-question">
+          Escribe una fórmula que devuelva <strong>"Bono"</strong> si se cumplen las dos condiciones, o <strong>"Sin bono"</strong> si no.
+        </div>
+        <div class="ex-input-row">
+          <input class="ex-input" type="text" id="ans2" placeholder='=SI(Y(...))' autocomplete="off" spellcheck="false"/>
+          <button class="btn-validate" onclick="validate(2)">Validar ✓</button>
+        </div>
+        <button class="hint-btn" onclick="toggleHint(2)">💡 Ver pista</button>
+        <div class="hint-text" id="hint2">Usa Y() dentro de SI(). Ejemplo de estructura: =SI(Y(condición1; condición2); "Verdadero"; "Falso").</div>
+        <div class="feedback" id="fb2"></div>
+      </div>
+
+      <!-- ---- Ejercicio 3 ---- -->
+      <div class="exercise-card" id="ex3">
+        <div class="ex-header">
+          <div class="ex-num">3</div>
+          <div>
+            <div class="ex-title">Selección deportiva — Función O</div>
+            <div style="font-size:.83rem;color:var(--muted)">Nivel: Intermedio</div>
+          </div>
+        </div>
+        <div class="ex-context">
+          ⚽ Para entrar a la selección escolar, un alumno debe cumplir <em>al menos una</em>: nota en <strong>B2 &gt; 8</strong> O asistencia en <strong>C2 = 100</strong>.
+        </div>
+        <div class="ex-question">
+          Escribe la fórmula que devuelva <strong>"Seleccionado"</strong> si cumple al menos una condición, o <strong>"No"</strong> si no cumple ninguna.
+        </div>
+        <div class="ex-input-row">
+          <input class="ex-input" type="text" id="ans3" placeholder='=SI(O(...))' autocomplete="off" spellcheck="false"/>
+          <button class="btn-validate" onclick="validate(3)">Validar ✓</button>
+        </div>
+        <button class="hint-btn" onclick="toggleHint(3)">💡 Ver pista</button>
+        <div class="hint-text" id="hint3">Usa O() dentro de SI(). Estructura: =SI(O(condición1; condición2); "Seleccionado"; "No"). Recuerda que O() es VERDADERO si al menos una condición se cumple.</div>
+        <div class="feedback" id="fb3"></div>
+      </div>
+
+      <!-- ---- Ejercicio 4 ---- -->
+      <div class="exercise-card" id="ex4">
+        <div class="ex-header">
+          <div class="ex-num">4</div>
+          <div>
+            <div class="ex-title">Inventario de tienda — Función NO</div>
+            <div style="font-size:.83rem;color:var(--muted)">Nivel: Avanzado</div>
+          </div>
+        </div>
+        <div class="ex-context">
+          🛒 En la columna <strong>B2</strong> está el estado de un producto: <strong>"En stock"</strong> o <strong>"Agotado"</strong>. Necesitas identificar los que hay que reponer.
+        </div>
+        <div class="ex-question">
+          Escribe una fórmula que devuelva <strong>"Pedir"</strong> cuando el producto <em>no</em> está en stock, y <strong>"OK"</strong> cuando sí lo está. Usa la función <strong>NO</strong>.
+        </div>
+        <div class="ex-input-row">
+          <input class="ex-input" type="text" id="ans4" placeholder='=SI(NO(...))' autocomplete="off" spellcheck="false"/>
+          <button class="btn-validate" onclick="validate(4)">Validar ✓</button>
+        </div>
+        <button class="hint-btn" onclick="toggleHint(4)">💡 Ver pista</button>
+        <div class="hint-text" id="hint4">Usa NO() dentro de SI(). Estructura: =SI(NO(condición); "cuando es falsa"; "cuando es verdadera"). Ejemplo: =SI(NO(B2="En stock"); "Pedir"; "OK").</div>
+        <div class="feedback" id="fb4"></div>
+      </div>
+
+      <!-- Reset button -->
+      <div class="controls-row">
+        <button class="btn-reset" onclick="resetAll()">↺ Reiniciar ejercicios</button>
+      </div>
+
+    </div><!-- /ejercicios -->
+
+  </div><!-- /container -->
+
+  <footer>
+    Hecho con 💜 para estudiantes · FuncioLogic — Excel para Jóvenes
+  </footer>
+
+  <!-- ==============================
+       JAVASCRIPT
+  ============================== -->
+  <script>
+    // =========================================
+    // TAB SWITCHING
+    // =========================================
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Deactivate all
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        // Activate clicked
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // =========================================
+    // NORMALIZE: strips spaces, unifies separators,
+    // unifies quotes, removes accents, lowercases
+    // =========================================
+    function normalize(str) {
+      return str
+        .trim()
+        .toLowerCase()
+        // Normalise accented characters: é→e, ó→o, etc.
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        // Unify all kinds of quotes to plain "
+        .replace(/[''`´""«»]/g, '"')
+        // Remove every whitespace character
+        .replace(/\s+/g, '')
+        // Unify ; and , as separator (use , internally)
+        .replace(/;/g, ',');
+    }
+
+    // =========================================
+    // EXERCISE ANSWERS — stored pre-normalized
+    // Each entry is already run through normalize()
+    // so comparison is straightforward.
+    //
+    // Ejercicio 3: accepts "Seleccionado"/"No" (as shown
+    //   in the enunciado) AND "Seleccionado"/"No clasificó"
+    // Ejercicio 4: accepts "Pedir"/"OK" (as shown in hint
+    //   and card example) AND "Reponer"/"OK"
+    // =========================================
+    const ANSWERS = {
+      1: [
+        // =SI(B2>=6;"Aprobado";"Reprobado")
+        '=si(b2>=6,"aprobado","reprobado")',
+      ],
+      2: [
+        // =SI(Y(B2>100;C2="Sí");"Bono";"Sin bono")
+        '=si(y(b2>100,c2="si"),"bono","sinbono")',
+        // variant without accent on Sí already covered by normalize
+      ],
+      3: [
+        // Primary: as written in the enunciado "Seleccionado" / "No"
+        '=si(o(b2>8,c2=100),"seleccionado","no")',
+        // Also accept "No clasificó" / "No clasifico"
+        '=si(o(b2>8,c2=100),"seleccionado","noclasifco")',
+        '=si(o(b2>8,c2=100),"seleccionado","noclasific")',
+        '=si(o(b2>8,c2=100),"seleccionado","noclasific")',
+      ],
+      4: [
+        // Primary: "Pedir" / "OK"  (as shown in the fn-card example)
+        '=si(no(b2="enstock"),"pedir","ok")',
+        // Also accept "Reponer" / "OK"
+        '=si(no(b2="enstock"),"reponer","ok")',
+      ],
+    };
+
+    // =========================================
+    // FLEXIBLE MATCH — instead of exact string
+    // matching, we check structural key parts so
+    // minor text variants in the value strings
+    // are still accepted.
+    // =========================================
+    function isMatch(num, norm) {
+      // Helper: does norm contain all required substrings?
+      const has = (...parts) => parts.every(p => norm.includes(normalize(p)));
+
+      switch (num) {
+        case 1:
+          // Must have: =SI, B2>=6, two text values with aprobado & reprobado
+          return has('=si(', 'b2>=6') &&
+                 norm.includes('"aprobado"') &&
+                 norm.includes('"reprobado"');
+
+        case 2:
+          // Must have: =SI(Y(, B2>100, C2="si"/"sí", bono, sin bono
+          return has('=si(', 'y(', 'b2>100') &&
+                 (norm.includes('"si"') || norm.includes('"s')) &&
+                 norm.includes('"bono"') &&
+                 (norm.includes('"sinbono"') || norm.includes('"sin'));
+
+        case 3:
+          // Must have: =SI(O(, B2>8, C2=100, seleccionado
+          return has('=si(', 'o(', 'b2>8', 'c2=100') &&
+                 norm.includes('"seleccionado"');
+
+        case 4:
+          // Must have: =SI(NO(, B2="en stock" (spaces stripped → "enstock")
+          // and either "pedir" or "reponer", and "ok"
+          return has('=si(', 'no(') &&
+                 (norm.includes('"enstock"') || norm.includes('"enstock"')) &&
+                 norm.includes('"ok"') &&
+                 (norm.includes('"pedir"') || norm.includes('"reponer"'));
+
+        default:
+          return false;
+      }
+    }
+
+    // Track state
+    const state = { solved: 0, results: { 1:null, 2:null, 3:null, 4:null } };
+
+    // =========================================
+    // VALIDATE
+    // =========================================
+    function validate(num) {
+      if (state.results[num] !== null) return; // already answered
+
+      const input = document.getElementById(`ans${num}`);
+      const fb    = document.getElementById(`fb${num}`);
+      const card  = document.getElementById(`ex${num}`);
+      const raw   = input.value;
+      const norm  = normalize(raw);
+
+      // Structural validation — flexible, accent/separator/space-agnostic
+      const isCorrect = isMatch(num, norm);
+
+      fb.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+      fb.style.display = 'flex';
+
+      if (isCorrect) {
+        fb.innerHTML = '✅ <strong>¡Excelente!</strong> Esa es la respuesta correcta. 🎉';
+        card.classList.add('correct');
+        input.disabled = true;
+        // Disable validate btn
+        card.querySelector('.btn-validate').disabled = true;
+        state.results[num] = true;
+        state.solved++;
+      } else {
+        fb.innerHTML = '❌ <strong>No del todo…</strong> Revisa la sintaxis e inténtalo de nuevo.';
+        card.classList.add('wrong');
+        // Remove wrong class after animation
+        setTimeout(() => card.classList.remove('wrong'), 1200);
+        state.results[num] = false;
+
+        // Shake animation
+        input.style.animation = 'none';
+        input.offsetHeight; // reflow
+        input.style.animation = 'shake .4s ease';
+      }
+
+      updateProgress();
+
+      // Show score banner when all 4 answered (right or multiple wrong)
+      const totalAnswered = Object.values(state.results).filter(v => v !== null).length;
+      if (state.solved === 4) showScore();
+    }
+
+    // =========================================
+    // SHAKE KEYFRAME (injected)
+    // =========================================
+    const styleShake = document.createElement('style');
+    styleShake.textContent = `
+      @keyframes shake {
+        0%,100%{ transform:translateX(0) }
+        20%    { transform:translateX(-6px) }
+        40%    { transform:translateX(6px) }
+        60%    { transform:translateX(-4px) }
+        80%    { transform:translateX(4px) }
+      }
+    `;
+    document.head.appendChild(styleShake);
+
+    // =========================================
+    // PROGRESS BAR
+    // =========================================
+    function updateProgress() {
+      const pct = (state.solved / 4) * 100;
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressText').textContent = `${state.solved} / 4 completados`;
+    }
+
+    // =========================================
+    // SCORE BANNER
+    // =========================================
+    function showScore() {
+      const banner = document.getElementById('scoreBanner');
+      const num    = document.getElementById('scoreNum');
+      const msg    = document.getElementById('scoreMsg');
+      banner.style.display = 'block';
+      num.textContent = `${state.solved} / 4`;
+
+      const messages = {
+        4: '🌟 ¡Perfecto! Dominas las funciones lógicas de Excel.',
+        3: '🎯 ¡Muy bien! Casi perfecto, sigue así.',
+        2: '📈 Buen inicio, repasa las funciones que fallaste.',
+        1: '💪 Vas por buen camino, practica un poco más.',
+        0: '🔄 Revisa el Resumen y vuelve a intentarlo.',
+      };
+      msg.textContent = messages[state.solved] || '';
+      banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // =========================================
+    // HINTS
+    // =========================================
+    function toggleHint(num) {
+      const h = document.getElementById(`hint${num}`);
+      h.style.display = h.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // =========================================
+    // RESET
+    // =========================================
+    function resetAll() {
+      // Reset state
+      state.solved = 0;
+      state.results = { 1:null, 2:null, 3:null, 4:null };
+
+      // Reset each exercise
+      [1,2,3,4].forEach(n => {
+        const input = document.getElementById(`ans${n}`);
+        const fb    = document.getElementById(`fb${n}`);
+        const card  = document.getElementById(`ex${n}`);
+        const hint  = document.getElementById(`hint${n}`);
+        const btn   = card.querySelector('.btn-validate');
+
+        input.value = '';
+        input.disabled = false;
+        input.style.animation = '';
+        fb.style.display = 'none';
+        fb.className = 'feedback';
+        card.classList.remove('correct', 'wrong');
+        hint.style.display = 'none';
+        btn.disabled = false;
+      });
+
+      // Reset progress
+      updateProgress();
+
+      // Hide score banner
+      document.getElementById('scoreBanner').style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>
